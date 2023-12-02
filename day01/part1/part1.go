@@ -1,5 +1,5 @@
 // Advent of Code 2023
-// Day 01
+// Day 01 - Part 1
 // 12-01-23
 package main
 
@@ -12,7 +12,7 @@ import (
 )
 
 func main() {
-	file, _ := os.ReadFile("input.txt")
+	file, _ := os.ReadFile("../input.txt")
 	text := string(file)
 	lines := strings.Split(text, "\n")
 	values := make([]int, 0)
