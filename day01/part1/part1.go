@@ -15,6 +15,7 @@ func main() {
 	file, _ := os.ReadFile("../input.txt")
 	text := string(file)
 	lines := strings.Split(text, "\n")
+
 	values := make([]int, 0)
 
 	for _, line := range lines {
