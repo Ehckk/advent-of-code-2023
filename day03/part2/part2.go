@@ -1,5 +1,5 @@
 // Advent of Code 2023
-// Day 03 - Part 1
+// Day 03 - Part 2
 // 12-03-23
 package main
 
@@ -9,6 +9,7 @@ import (
 	"math"
 	"os"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 )
@@ -30,17 +31,23 @@ func read(path string) []string {
 	return lines
 }
 
+type Key struct{ y, x int }
+
 func main() {
 	lines := read(os.Args[1])
 	digitCheck := regexp.MustCompile(`[0-9]`)
-	symbolCheck := regexp.MustCompile(`[^\d\.]`)
+	gearCheck := regexp.MustCompile(`\*`)
 
 	grid := [][]string{}
 	for _, line := range lines {
 		grid = append(grid, strings.Split(strings.TrimSpace(line), ""))
 	}
 
-	hasAdjSymbol := func(i int, j int) bool {
+	// map of sets ;-;
+	gears := map[Key][]int{}
+
+	hasAdjGears := func(i int, j int) []Key {
+		adjGears := []Key{}
 		for r := -1; r <= 1; r++ {
 			// These kinds of loops make me sad 😢
 			for c := -1; c <= 1; c++ {
@@ -50,17 +57,16 @@ func main() {
 				if y < 0 || y > len(grid)-1 || x < 0 || x > len(grid[i])-1 {
 					continue
 				}
-				if !symbolCheck.MatchString(grid[y][x]) {
+				if !gearCheck.MatchString(grid[y][x]) {
 					continue
 				}
-				return true
+				adjGears = append(adjGears, Key{y, x})
 			}
 		}
-		return false
+		return adjGears
 	}
 
 	stack := []string{}
-	total := 0
 	for i, chars := range grid {
 		j := 0
 		for j < len(chars) {
@@ -78,28 +84,37 @@ func main() {
 			}
 
 			// now lets find a symbol and sum the values :)
-			hasSymbol := false
 			value := 0
 			k := 0
+			// and the adjacent gears to this number
+			adjGears := []Key{}
 			for len(stack) > 0 {
 				end := len(stack) - 1
 				num, _ := strconv.Atoi(stack[end])
 				stack = stack[:end]
-
 				value += num * int(math.Pow10(k))
 				k += 1
-
-				// make sure we find an adjacent symbol around the number
-				if hasSymbol {
-					continue // if we haven't already :)
+				adjGears = append(adjGears, hasAdjGears(i, j-k)...)
+			}
+			for _, gear := range adjGears {
+				if slices.Contains(gears[gear], value) {
+					continue
 				}
-				hasSymbol = hasAdjSymbol(i, j-k)
+				gears[gear] = append(gears[gear], value)
 			}
-			if hasSymbol {
-				total += value
-			}
-			j += 1
 		}
+	}
+	// sum the gear numbers but only if the gear has 2 adjacent numbers
+	total := 0
+	for _, values := range gears {
+		if len(values) != 2 {
+			continue
+		}
+		factor := 1
+		for _, value := range values {
+			factor *= value
+		}
+		total += factor
 	}
 	fmt.Println(total)
 }
