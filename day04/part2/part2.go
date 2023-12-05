@@ -1,5 +1,5 @@
 // Advent of Code 2023
-// Day 04 - Part 1
+// Day 04 - Part 2
 // 12-04-23
 package main
 
@@ -36,7 +36,7 @@ func main() {
 	lines := read(os.Args[1])
 	spaces := regexp.MustCompile(`\s+`)
 
-	counts := make([]int, len(lines))
+	copies := make([]int, len(lines))
 	for i, line := range lines {
 		line = strings.Split(strings.TrimSpace(line), ":")[1]
 		values := strings.Split(strings.TrimSpace(line), "|")
@@ -47,27 +47,26 @@ func main() {
 			value, _ := strconv.Atoi(value)
 			winning[value] = false
 		}
-		counts[i] += 1
-		wins := 0
+
+		count := 0
 		for _, value := range spaces.Split(strings.TrimSpace(values[1]), -1) {
 			value, _ := strconv.Atoi(value)
 			checked, exists := winning[value]
 			if exists && !checked {
 				winning[value] = true
-				wins += 1
+				count += 1
 			}
 		}
-		for c := i + 1; c < i+wins; c++ {
-			if c < len(counts) {
-				counts[c] += counts[i]
-			}
-		}
-		fmt.Println(i, wins, counts)
-	}
 
-	total := 0
-	for _, amount := range counts {
-		total += amount
+		for j := i + 1; j <= i+count; j++ {
+			if j < len(copies) {
+				copies[j] += copies[i] + 1
+			}
+		}
 	}
-	fmt.Println(counts, total)
+	total := 0
+	for _, amount := range copies {
+		total += amount + 1
+	}
+	fmt.Println(total)
 }
